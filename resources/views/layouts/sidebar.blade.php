@@ -44,15 +44,14 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="{{ route('items.index') }}" class="nav-link {{ request()->is('items.index') ? 'active' : '' }}">
-                  <i class="nav-icon bi bi-box-seam-fill"></i>
-                  <p>
-                    Items
-                    <i class="nav-arrow bi bi-chevron-right"></i>
-                  </p>
+                <a href="{{ route('items.index') }}" class="nav-link {{ request()->routeIs('items.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-box-seam-fill"></i>
+                    <p>
+                        Items
+                        <i class="nav-arrow bi bi-chevron-right"></i>
+                    </p>
                 </a>
-
-              </li>
+            </li>
               <li class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon bi bi-clipboard-fill"></i>

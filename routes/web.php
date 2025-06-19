@@ -13,12 +13,12 @@ Route::get('/pos-dashboard', function () {
     return view('posDashboard');
 })->name('pos.dashboard');
 
-// Items Resource Routes
-Route::controller(ItemController::class)->prefix('items')->group(function() {
-    Route::get('/', 'index')->name('items.index');
-    Route::get('/getItems', 'getItems')->name('items.getItems'); // DataTables AJAX route
-    Route::post('/', 'store')->name('items.store');
-    Route::get('/{id}/edit', 'edit')->name('items.edit');
-    Route::put('/{id}', 'update')->name('items.update');
-    Route::delete('/{id}', 'destroy')->name('items.destroy');
-});
+
+Route::get('/items', [ItemController::class, 'index'])->name('items.index');
+Route::get('/items/getItems', [ItemController::class, 'getItems'])->name('items.getItems');
+Route::post('/items', [ItemController::class, 'store'])->name('items.store');
+Route::get('/items/{id}/edit', [ItemController::class, 'edit'])->name('items.edit');
+Route::put('/items/{id}', [ItemController::class, 'update'])->name('items.update');
+Route::delete('/items/{id}', [ItemController::class, 'destroy'])->name('items.destroy');
+
+
