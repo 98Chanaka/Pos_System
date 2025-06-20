@@ -9,9 +9,9 @@ Route::get('/', function () {
     return view('AdminDashboard');
 })->name('Admin.dashboard');
 
-Route::get('/pos-dashboard', function () {
-    return view('posDashboard');
-})->name('pos.dashboard');
+// Route::get('/pos-dashboard', function () {
+//     return view('items.posDashboard');
+// })->name('pos.dashboard');
 
 
 Route::get('/items', [ItemController::class, 'index'])->name('items.index');
@@ -21,4 +21,8 @@ Route::get('/items/{id}/edit', [ItemController::class, 'edit'])->name('items.edi
 Route::put('/items/{id}', [ItemController::class, 'update'])->name('items.update');
 Route::delete('/items/{id}', [ItemController::class, 'destroy'])->name('items.destroy');
 
+
+Route::get('/pos-dashboard', [PosController::class, 'index'])->name('pos.index');
+Route::get('/search-items', [PosController::class, 'searchItems'])->name('pos.searchItems');
+Route::get('/get-item', [PosController::class, 'getItemByCode'])->name('pos.getItemByCode');
 

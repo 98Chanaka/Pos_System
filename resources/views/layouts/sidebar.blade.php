@@ -38,11 +38,11 @@
 
               </li>
               <li class="nav-item">
-                <a href="{{ route('pos.dashboard') }}" class="nav-link {{ request()->is('pos-dashboard') ? 'active' : '' }}">
-                  <i class="nav-icon bi bi-palette"></i>
-                  <p>POS</p>
+                <a href="{{ route('pos.index') }}" class="nav-link {{ request()->is('pos-dashboard') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-palette"></i>
+                    <p>POS</p>
                 </a>
-              </li>
+            </li>
               <li class="nav-item">
                 <a href="{{ route('items.index') }}" class="nav-link {{ request()->routeIs('items.*') ? 'active' : '' }}">
                     <i class="nav-icon bi bi-box-seam-fill"></i>

@@ -5,144 +5,505 @@
 @section('content')
 <div class="app-content">
     <div class="container-fluid py-4">
+        <div class="row">
+            <!-- Customer Details - Full Width Card with Two Sections -->
+            <div class="col-md-12">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-center align-items-center">
+                        <h5 class="card-title mb-0">Customer Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Left Section - Basic Info -->
+                            <div class="col-md-6 border-end">
+                                <form>
+                                    <div class="mb-3">
+                                        <label for="customerName" class="form-label">Customer Name</label>
+                                        <input type="text" class="form-control" id="customerName" placeholder="Enter customer name">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="customerPhone" class="form-label">Phone Number</label>
+                                        <input type="text" class="form-control" id="customerPhone" placeholder="Enter phone number">
+                                    </div>
+                                    
+                                </form>
+                            </div>
 
-        {{-- Header --}}
-        <div class="mb-4">
-            <h2 class="fw-bold">POS Dashboard</h2>
+                            <!-- Right Section - Additional Info -->
+                            <div class="col-md-6">
+                                <form>
+                                    <div class="mb-3">
+                                        <label for="customerEmail" class="form-label">Email Address</label>
+                                        <input type="email" class="form-control" id="customerEmail" placeholder="Enter email address">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="customerAddress" class="form-label">Address</label>
+                                        <textarea class="form-control" id="customerAddress" rows="2" placeholder="Enter customer address"></textarea>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        {{-- Search Filters --}}
-        <div class="row mb-3">
-            <div class="col-md-3">
-                <input type="text" id="item_name" class="form-control" placeholder="Item Name">
+        <!-- Items Card with Select2 Search -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white d-flex justify-content-center align-items-center">
+                <h5 class="card-title mb-0">Items Search</h5>
             </div>
-            <div class="col-md-3">
-                <input type="text" id="item_code" class="form-control" placeholder="Item Code">
-            </div>
-            <div class="col-md-3">
-                <input type="text" id="company_name" class="form-control" placeholder="Company Name">
-            </div>
-            <div class="col-md-3">
-                <button id="filter" class="btn btn-primary">Search</button>
-                <button id="reset" class="btn btn-danger">Reset</button>
-
-               <!-- Add Button -->
-                <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addItemModal">
-                    Add
-                </button>
-
-            </div>
-        </div>
-
-        {{-- DataTable --}}
-        <div class="card">
             <div class="card-body">
-                <table class="table table-bordered" id="posTable" style="width:100%">
+                <form id="itemSearchForm">
+                    <div class="row g-2 align-items-end">
+                        <!-- Item Code Search with Select2 -->
+                        <div class="col-md-3">
+                            <label for="itemCode" class="form-label">Item Code</label>
+                            <select class="form-select select2-item-code" id="itemCode" name="item_code">
+                                <option></option> <!-- Empty option for placeholder -->
+                            </select>
+                        </div>
+
+                        <!-- Item Name Search with Select2 -->
+                        <div class="col-md-3">
+                            <label for="itemName" class="form-label">Item Name</label>
+                            <select class="form-select select2-item-name" id="itemName" name="item_name">
+                                <option></option> <!-- Empty option for placeholder -->
+                            </select>
+                        </div>
+
+                        <!-- Company Search with Select2 -->
+                        <div class="col-md-3">
+                            <label for="companyName" class="form-label">Company</label>
+                            <select class="form-select select2-company" id="companyName" name="company_name">
+                                <option></option> <!-- Empty option for placeholder -->
+                                @foreach($companies as $company)
+                                    <option value="{{ $company }}">{{ $company }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Action buttons -->
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-success w-100 btn-sm" id="addItemBtn">Add</button>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="reset" class="btn btn-warning w-100 btn-sm" id="resetBtn">Reset</button>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-info w-100 btn-sm" id="searchItemBtn">Find</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="card">
+            <div class="card-header bg-dark text-white d-flex justify-content-center align-items-center">
+                <h5 class="card-title mb-0">Order Items</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Item Code</th>
+                                <th>Item Name</th>
+                                <th>Company</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderItemsTable">
+                            <!-- Items will be added here dynamically -->
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="6" class="text-end fw-bold">Subtotal:</td>
+                                <td colspan="2" id="subtotal">$0.00</td>
+                            </tr>
+                            <tr>
+                                <td colspan="6" class="text-end fw-bold">Tax (10%):</td>
+                                <td colspan="2" id="tax">$0.00</td>
+                            </tr>
+                            <tr>
+                                <td colspan="6" class="text-end fw-bold">Total:</td>
+                                <td colspan="2" id="total">$0.00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-end mt-3 gap-2">
+                    <button class="btn btn-outline-secondary" id="holdOrderBtn">Hold Order</button>
+                    <button class="btn btn-outline-primary" id="printInvoiceBtn">Print Invoice</button>
+                    <button class="btn btn-success" id="completeOrderBtn">Complete Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Item Selection -->
+<div class="modal fade" id="itemSelectionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Select Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped" id="itemsTable">
                     <thead>
                         <tr>
-                            <th>Item Name</th>
-                            <th>Item Code</th>
-                            <th>Quantity</th>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Company</th>
                             <th>Price</th>
-                            <th>Total</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Mouse</td>
-                            <td>ITM001</td>
-                            <td>10</td>
-                            <td>$15.00</td>
-                            <td>$150.00</td>
-                        </tr>
-                        
+                        <!-- Items will be loaded here -->
                     </tbody>
                 </table>
-
-
-
             </div>
-        </div>
-        {{-- Cancel & Print Buttons --}}
-                <div class="d-flex justify-content-end mt-4">
-                    <button class="btn btn-danger me-2">Cancel</button>
-                    <button class="btn btn-success" onclick="window.print()">Print</button>
-                </div>
-
-    </div>
-</div>
-
-
-<!-- Add Item Modal -->
-<div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg"> <!-- Larger modal -->
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addItemModalLabel">Add New Item</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="POST" action="" enctype="multipart/form-data">
-                @csrf
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label>Item Code</label>
-                            <input type="text" name="item_code" class="form-control" required>
-                        </div>
-
-
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add</button>
-                </div>
-            </form>
         </div>
     </div>
 </div>
 
 @endsection
 
-@section('scripts')
-<!-- Include jQuery & DataTables JS -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
-
-{{-- Optional Script for DataTable AJAX --}}
-{{--
+@push('scripts')
 <script>
-    $(document).ready(function () {
-        let table = $('#posTable').DataTable({
-            processing: true,
-            serverSide: true,
+$(document).ready(function() {
+    // Initialize Select2 for all dropdowns
+    function initSelect2() {
+        $('.select2-company').select2({
+            placeholder: "Select a company",
+            allowClear: true,
+            theme: 'bootstrap-5',
+            width: '100%'
+        });
+
+        $('.select2-item-code').select2({
+            placeholder: "Search by item code",
+            allowClear: true,
+            theme: 'bootstrap-5',
+            width: '100%',
             ajax: {
-                url: '', // Your route here
-                data: function (d) {
-                    d.item_name = $('#item_name').val();
-                    d.item_code = $('#item_code').val();
-                    d.company_name = $('#company_name').val();
+                url: '{{ route("pos.searchItems") }}',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        search: params.term,
+                        search_type: 'code'
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.items.map(function(item) {
+                            return {
+                                id: item.item_code,
+                                text: item.item_code,
+                                item_id: item.id,
+                                item_name: item.item_name,
+                                company_name: item.company_name,
+                                selling_price: item.selling_price
+                            };
+                        })
+                    };
+                },
+                cache: true
+            }
+        });
+
+        $('.select2-item-name').select2({
+            placeholder: "Search by item name",
+            allowClear: true,
+            theme: 'bootstrap-5',
+            width: '100%',
+            ajax: {
+                url: '{{ route("pos.searchItems") }}',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        search: params.term,
+                        search_type: 'name'
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.items.map(function(item) {
+                            return {
+                                id: item.item_name,
+                                text: item.item_name,
+                                item_id: item.id,
+                                item_code: item.item_code,
+                                company_name: item.company_name,
+                                selling_price: item.selling_price
+                            };
+                        })
+                    };
+                },
+                cache: true
+            }
+        });
+    }
+
+    initSelect2();
+
+    // When item code is selected
+    $('#itemCode').on('select2:select', function (e) {
+        const data = e.params.data;
+        $('#itemName').val(null).trigger('change');
+        $('#companyName').val(data.company_name).trigger('change');
+
+        // Auto-fill the item name
+        const newOption = new Option(data.item_name, data.item_name, true, true);
+        $('#itemName').append(newOption).trigger('change');
+    });
+
+    // When item name is selected
+    $('#itemName').on('select2:select', function (e) {
+        const data = e.params.data;
+        $('#itemCode').val(null).trigger('change');
+        $('#companyName').val(data.company_name).trigger('change');
+
+        // Auto-fill the item code
+        const newOption = new Option(data.item_code, data.item_code, true, true);
+        $('#itemCode').append(newOption).trigger('change');
+    });
+
+    // Reset form
+    $('#resetBtn').click(function() {
+        $('#itemSearchForm')[0].reset();
+        $('.select2-item-code').val(null).trigger('change');
+        $('.select2-item-name').val(null).trigger('change');
+        $('.select2-company').val(null).trigger('change');
+    });
+
+    // Search items
+    $('#searchItemBtn').click(function() {
+        const formData = $('#itemSearchForm').serialize();
+
+        $.ajax({
+            url: '{{ route("pos.searchItems") }}',
+            type: 'GET',
+            data: formData,
+            success: function(response) {
+                const itemsTable = $('#itemsTable tbody');
+                itemsTable.empty();
+
+                if(response.items.length > 0) {
+                    response.items.forEach(function(item) {
+                        itemsTable.append(`
+                            <tr>
+                                <td>${item.item_code}</td>
+                                <td>${item.item_name}</td>
+                                <td>${item.company_name}</td>
+                                <td>$${item.selling_price}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary select-item"
+                                        data-id="${item.id}"
+                                        data-code="${item.item_code}"
+                                        data-name="${item.item_name}"
+                                        data-company="${item.company_name}"
+                                        data-price="${item.selling_price}">
+                                        Select
+                                    </button>
+                                </td>
+                            </tr>
+                        `);
+                    });
+
+                    $('#itemSelectionModal').modal('show');
+                } else {
+                    alert('No items found matching your criteria.');
                 }
-            },
-            columns: [
-                { data: 'item_name', name: 'item_name' },
-                { data: 'item_code', name: 'item_code' },
-                { data: 'quantity', name: 'quantity' },
-                { data: 'price', name: 'price' },
-                { data: 'total', name: 'total' }
-            ]
-        });
-
-        $('#filter').click(function () {
-            table.ajax.reload();
-        });
-
-        $('#reset').click(function () {
-            $('#item_name, #item_code, #company_name').val('');
-            table.ajax.reload();
+            }
         });
     });
+
+    // Add selected item to order
+    $(document).on('click', '.select-item', function() {
+        const item = {
+            id: $(this).data('id'),
+            code: $(this).data('code'),
+            name: $(this).data('name'),
+            company: $(this).data('company'),
+            price: $(this).data('price'),
+            quantity: 1
+        };
+
+        addItemToOrder(item);
+        $('#itemSelectionModal').modal('hide');
+    });
+
+    // Add item directly when Add button is clicked
+    $('#addItemBtn').click(function() {
+        const itemCode = $('#itemCode').select2('data')[0]?.item_id;
+        const itemName = $('#itemName').select2('data')[0]?.item_id;
+
+        if(itemCode || itemName) {
+            const selectedItem = itemCode ? $('#itemCode').select2('data')[0] : $('#itemName').select2('data')[0];
+
+            const item = {
+                id: selectedItem.item_id,
+                code: selectedItem.id,
+                name: selectedItem.item_name || selectedItem.text,
+                company: selectedItem.company_name,
+                price: selectedItem.selling_price,
+                quantity: 1
+            };
+
+            addItemToOrder(item);
+        } else {
+            alert('Please select an item first');
+        }
+    });
+
+    // Function to add item to order table
+    function addItemToOrder(item) {
+        const orderTable = $('#orderItemsTable');
+        const existingItem = orderTable.find(`tr[data-id="${item.id}"]`);
+
+        if(existingItem.length > 0) {
+            // Item already exists, increase quantity
+            const quantityInput = existingItem.find('.item-quantity');
+            const newQuantity = parseInt(quantityInput.val()) + 1;
+            quantityInput.val(newQuantity);
+
+            // Update total
+            const totalCell = existingItem.find('.item-total');
+            totalCell.text('$' + (item.price * newQuantity).toFixed(2));
+        } else {
+            // Add new item
+            const row = `
+                <tr data-id="${item.id}">
+                    <td>${orderTable.children().length + 1}</td>
+                    <td>${item.code}</td>
+                    <td>${item.name}</td>
+                    <td>${item.company}</td>
+                    <td>$${item.price}</td>
+                    <td>
+                        <input type="number" class="form-control form-control-sm item-quantity"
+                               value="1" min="1" style="width: 70px;">
+                    </td>
+                    <td class="item-total">$${item.price}</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger remove-item">Remove</button>
+                    </td>
+                </tr>
+            `;
+            orderTable.append(row);
+        }
+
+        updateOrderTotals();
+    }
+
+    // Remove item from order
+    $(document).on('click', '.remove-item', function() {
+        $(this).closest('tr').remove();
+        updateOrderNumbers();
+        updateOrderTotals();
+    });
+
+    // Update quantity and totals when changed
+    $(document).on('change', '.item-quantity', function() {
+        const row = $(this).closest('tr');
+        const price = parseFloat(row.find('td:eq(4)').text().replace('$', ''));
+        const quantity = parseInt($(this).val());
+        const total = price * quantity;
+
+        row.find('.item-total').text('$' + total.toFixed(2));
+        updateOrderTotals();
+    });
+
+    // Update row numbers
+    function updateOrderNumbers() {
+        $('#orderItemsTable tr').each(function(index) {
+            $(this).find('td:first').text(index + 1);
+        });
+    }
+
+    // Calculate order totals
+    function updateOrderTotals() {
+        let subtotal = 0;
+
+        $('.item-total').each(function() {
+            subtotal += parseFloat($(this).text().replace('$', ''));
+        });
+
+        const tax = subtotal * 0.1; // 10% tax
+        const total = subtotal + tax;
+
+        $('#subtotal').text('$' + subtotal.toFixed(2));
+        $('#tax').text('$' + tax.toFixed(2));
+        $('#total').text('$' + total.toFixed(2));
+    }
+
+    // Complete order
+    $('#completeOrderBtn').click(function() {
+        const items = [];
+        const customerName = $('#customerName').val();
+        const customerPhone = $('#customerPhone').val();
+
+        if(!customerName || !customerPhone) {
+            alert('Please enter customer name and phone number');
+            return;
+        }
+
+        $('#orderItemsTable tr').each(function() {
+            const item = {
+                id: $(this).data('id'),
+                quantity: $(this).find('.item-quantity').val(),
+                price: $(this).find('td:eq(4)').text().replace('$', '')
+            };
+            items.push(item);
+        });
+
+        if(items.length === 0) {
+            alert('Please add items to the order');
+            return;
+        }
+
+        const orderData = {
+            customer_name: customerName,
+            customer_phone: customerPhone,
+            customer_email: $('#customerEmail').val(),
+            customer_address: $('#customerAddress').val(),
+            items: items,
+            subtotal: $('#subtotal').text().replace('$', ''),
+            tax: $('#tax').text().replace('$', ''),
+            total: $('#total').text().replace('$', '')
+        };
+
+        // Here you would typically send the order to the server
+        console.log('Order completed:', orderData);
+        alert('Order completed successfully!');
+
+        // Clear the order table
+        $('#orderItemsTable').empty();
+        $('#itemSearchForm')[0].reset();
+        $('.select2').val(null).trigger('change');
+        updateOrderTotals();
+    });
+
+    // Hold order
+    $('#holdOrderBtn').click(function() {
+        alert('Order has been held');
+    });
+
+    // Print invoice
+    $('#printInvoiceBtn').click(function() {
+        window.print();
+    });
+});
 </script>
---}}
-@endsection
+@endpush
