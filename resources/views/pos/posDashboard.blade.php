@@ -25,7 +25,6 @@
                                         <label for="customerPhone" class="form-label">Phone Number</label>
                                         <input type="text" class="form-control" id="customerPhone" placeholder="Enter phone number">
                                     </div>
-                                    
                                 </form>
                             </div>
 
@@ -113,6 +112,7 @@
                                 <th>Item Name</th>
                                 <th>Company</th>
                                 <th>Price</th>
+                                <th>Discount</th>
                                 <th>Quantity</th>
                                 <th>Total</th>
                                 <th>Action</th>
@@ -127,8 +127,13 @@
                                 <td colspan="2" id="subtotal">$0.00</td>
                             </tr>
                             <tr>
-                                <td colspan="6" class="text-end fw-bold">Tax (10%):</td>
-                                <td colspan="2" id="tax">$0.00</td>
+                                <td colspan="6" class="text-end fw-bold">Discount:</td>
+                                <td colspan="2">
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="discountInput" value="0" min="0" max="100" step="0.01">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </td>
                             </tr>
                             <tr>
                                 <td colspan="6" class="text-end fw-bold">Total:</td>
@@ -138,9 +143,9 @@
                     </table>
                 </div>
                 <div class="d-flex justify-content-end mt-3 gap-2">
-                    <button class="btn btn-outline-secondary" id="holdOrderBtn">Hold Order</button>
+                    <button class="btn btn-outline-danger" id="cancelOrderBtn">Cancel Order</button>
                     <button class="btn btn-outline-primary" id="printInvoiceBtn">Print Invoice</button>
-                    <button class="btn btn-success" id="completeOrderBtn">Complete Order</button>
+
                 </div>
             </div>
         </div>
@@ -338,7 +343,8 @@ $(document).ready(function() {
             name: $(this).data('name'),
             company: $(this).data('company'),
             price: $(this).data('price'),
-            quantity: 1
+            quantity: 1,
+            discount: 0
         };
 
         addItemToOrder(item);
@@ -359,7 +365,8 @@ $(document).ready(function() {
                 name: selectedItem.item_name || selectedItem.text,
                 company: selectedItem.company_name,
                 price: selectedItem.selling_price,
-                quantity: 1
+                quantity: 1,
+                discount: 0
             };
 
             addItemToOrder(item);
@@ -381,7 +388,10 @@ $(document).ready(function() {
 
             // Update total
             const totalCell = existingItem.find('.item-total');
-            totalCell.text('$' + (item.price * newQuantity).toFixed(2));
+            const price = parseFloat(existingItem.find('td:eq(4)').text().replace('$', ''));
+            const discount = parseFloat(existingItem.find('.item-discount').val()) || 0;
+            const discountedPrice = price - (price * (discount / 100));
+            totalCell.text('$' + (discountedPrice * newQuantity).toFixed(2));
         } else {
             // Add new item
             const row = `
@@ -392,10 +402,18 @@ $(document).ready(function() {
                     <td>${item.company}</td>
                     <td>$${item.price}</td>
                     <td>
+                        <div class="input-group input-group-sm" style="width: 100px;">
+                            <input type="number" class="form-control form-control-sm item-discount"
+                                   value="0" min="0" max="100" step="0.01">
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </td>
+                    <td>
                         <input type="number" class="form-control form-control-sm item-quantity"
                                value="1" min="1" style="width: 70px;">
                     </td>
                     <td class="item-total">$${item.price}</td>
+
                     <td>
                         <button class="btn btn-sm btn-danger remove-item">Remove</button>
                     </td>
@@ -415,13 +433,22 @@ $(document).ready(function() {
     });
 
     // Update quantity and totals when changed
-    $(document).on('change', '.item-quantity', function() {
+    $(document).on('change', '.item-quantity, .item-discount', function() {
         const row = $(this).closest('tr');
         const price = parseFloat(row.find('td:eq(4)').text().replace('$', ''));
-        const quantity = parseInt($(this).val());
-        const total = price * quantity;
+        const quantity = parseInt(row.find('.item-quantity').val());
+        const discount = parseFloat(row.find('.item-discount').val()) || 0;
+
+        // Calculate discounted price
+        const discountedPrice = price - (price * (discount / 100));
+        const total = discountedPrice * quantity;
 
         row.find('.item-total').text('$' + total.toFixed(2));
+        updateOrderTotals();
+    });
+
+    // Apply global discount when changed
+    $('#discountInput').on('change', function() {
         updateOrderTotals();
     });
 
@@ -440,11 +467,11 @@ $(document).ready(function() {
             subtotal += parseFloat($(this).text().replace('$', ''));
         });
 
-        const tax = subtotal * 0.1; // 10% tax
-        const total = subtotal + tax;
+        const discountPercentage = parseFloat($('#discountInput').val()) || 0;
+        const discountAmount = subtotal * (discountPercentage / 100);
+        const total = subtotal - discountAmount;
 
         $('#subtotal').text('$' + subtotal.toFixed(2));
-        $('#tax').text('$' + tax.toFixed(2));
         $('#total').text('$' + total.toFixed(2));
     }
 
@@ -463,7 +490,8 @@ $(document).ready(function() {
             const item = {
                 id: $(this).data('id'),
                 quantity: $(this).find('.item-quantity').val(),
-                price: $(this).find('td:eq(4)').text().replace('$', '')
+                price: $(this).find('td:eq(4)').text().replace('$', ''),
+                discount: $(this).find('.item-discount').val() || 0
             };
             items.push(item);
         });
@@ -480,7 +508,7 @@ $(document).ready(function() {
             customer_address: $('#customerAddress').val(),
             items: items,
             subtotal: $('#subtotal').text().replace('$', ''),
-            tax: $('#tax').text().replace('$', ''),
+            discount: $('#discountInput').val(),
             total: $('#total').text().replace('$', '')
         };
 
@@ -492,13 +520,45 @@ $(document).ready(function() {
         $('#orderItemsTable').empty();
         $('#itemSearchForm')[0].reset();
         $('.select2').val(null).trigger('change');
+        $('#discountInput').val(0);
         updateOrderTotals();
     });
 
-    // Hold order
-    $('#holdOrderBtn').click(function() {
-        alert('Order has been held');
+    // Cancel order
+    $('#cancelOrderBtn').click(function() {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This will clear the current order!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, cancel it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Clear the order table
+                $('#orderItemsTable').empty();
+                // Reset the form
+                $('#itemSearchForm')[0].reset();
+                $('.select2').val(null).trigger('change');
+                // Reset customer details
+                $('#customerName').val('');
+                $('#customerPhone').val('');
+                $('#customerEmail').val('');
+                $('#customerAddress').val('');
+                // Reset totals
+                $('#discountInput').val(0);
+                updateOrderTotals();
+
+                Swal.fire(
+                    'Cancelled!',
+                    'Your order has been cancelled.',
+                    'success'
+                );
+            }
+        });
     });
+
 
     // Print invoice
     $('#printInvoiceBtn').click(function() {
