@@ -32,27 +32,39 @@
                   <i class="nav-icon bi bi-speedometer"></i>
                   <p>
                     Dashboard
-                    <i class="nav-arrow bi bi-chevron-right"></i>
                   </p>
                 </a>
+                <li class="nav-item">
+                  <a href="" class="nav-link {{ request()->is('pos-dashboard') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-palette"></i>
+                      <p>Suppliers</p>
+                  </a>
+              </li>
 
               </li>
+              <li class="nav-item">
+                <a href="{{ route('items.index') }}" class="nav-link {{ request()->routeIs('items.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-box-seam-fill"></i>
+                    <p>
+                        Items
+                    </p>
+                </a>
+            </li>
               <li class="nav-item">
                 <a href="{{ route('pos.index') }}" class="nav-link {{ request()->is('pos-dashboard') ? 'active' : '' }}">
                     <i class="nav-icon bi bi-palette"></i>
                     <p>POS</p>
                 </a>
             </li>
-              <li class="nav-item">
-                <a href="{{ route('items.index') }}" class="nav-link {{ request()->routeIs('items.*') ? 'active' : '' }}">
-                    <i class="nav-icon bi bi-box-seam-fill"></i>
-                    <p>
-                        Items
-                        <i class="nav-arrow bi bi-chevron-right"></i>
-                    </p>
-                </a>
-            </li>
-              <li class="nav-item">
+            <li class="nav-item">
+              <a href="" class="nav-link {{ request()->is('pos-dashboard') ? 'active' : '' }}">
+                  <i class="nav-icon bi bi-palette"></i>
+                  <p>Customers</p>
+              </a>
+          </li>
+          
+              
+              <!--<li class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon bi bi-clipboard-fill"></i>
                   <p>
@@ -233,7 +245,7 @@
                   </li>
                 </ul>
               </li>
-              <li class="nav-header">DOCUMENTATIONS</li>
+               <li class="nav-header">DOCUMENTATIONS</li>
               <li class="nav-item">
                 <a href="./docs/introduction.html" class="nav-link">
                   <i class="nav-icon bi bi-download"></i>
@@ -381,7 +393,7 @@
                   <p>Level 1</p>
                 </a>
               </li>
-              <li class="nav-header">LABELS</li>
+             <li class="nav-header">LABELS</li>
               <li class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon bi bi-circle text-danger"></i>
@@ -399,7 +411,7 @@
                   <i class="nav-icon bi bi-circle text-info"></i>
                   <p>Informational</p>
                 </a>
-              </li>
+              </li>-->
             </ul>
             <!--end::Sidebar Menu-->
           </nav>

@@ -32,7 +32,7 @@
                             <th>Item Name</th>
                             <th>M/F Date</th>
                             <th>Exp Date</th>
-                            <th>Company Name</th>
+                            <th>Supplier</th>
                             <th>Image</th>
                             <th>Quantity</th>
                             <th>Cost Price</th>

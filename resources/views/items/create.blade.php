@@ -31,7 +31,7 @@
                             <input type="date" name="exp_date" class="form-control" required min="{{ date('Y-m-d') }}">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label>Company Name</label>
+                            <label>Supplier</label>
                             <input type="text" name="company_name" class="form-control">
                         </div>
                         <div class="col-md-6 mb-3">

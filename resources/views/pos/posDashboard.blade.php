@@ -124,7 +124,7 @@
                         <tfoot>
                             <tr>
                                 <td colspan="6" class="text-end fw-bold">Subtotal:</td>
-                                <td colspan="2" id="subtotal">$0.00</td>
+                                <td colspan="2" id="subtotal">LKR 0.00</td>
                             </tr>
                             <tr>
                                 <td colspan="6" class="text-end fw-bold">Discount:</td>
@@ -137,7 +137,7 @@
                             </tr>
                             <tr>
                                 <td colspan="6" class="text-end fw-bold">Total:</td>
-                                <td colspan="2" id="total">$0.00</td>
+                                <td colspan="2" id="total">LKR 0.00</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -388,7 +388,7 @@ $(document).ready(function() {
 
             // Update total
             const totalCell = existingItem.find('.item-total');
-            const price = parseFloat(existingItem.find('td:eq(4)').text().replace('$', ''));
+            const price = parseFloat(existingItem.find('td:eq(4)').text().replace('LKR', ''));
             const discount = parseFloat(existingItem.find('.item-discount').val()) || 0;
             const discountedPrice = price - (price * (discount / 100));
             totalCell.text('$' + (discountedPrice * newQuantity).toFixed(2));
@@ -400,7 +400,7 @@ $(document).ready(function() {
                     <td>${item.code}</td>
                     <td>${item.name}</td>
                     <td>${item.company}</td>
-                    <td>$${item.price}</td>
+                    <td>${item.price}</td>
                     <td>
                         <div class="input-group input-group-sm" style="width: 100px;">
                             <input type="number" class="form-control form-control-sm item-discount"
@@ -412,7 +412,7 @@ $(document).ready(function() {
                         <input type="number" class="form-control form-control-sm item-quantity"
                                value="1" min="1" style="width: 70px;">
                     </td>
-                    <td class="item-total">$${item.price}</td>
+                    <td class="item-total">${item.price}</td>
 
                     <td>
                         <button class="btn btn-sm btn-danger remove-item">Remove</button>
@@ -443,7 +443,7 @@ $(document).ready(function() {
         const discountedPrice = price - (price * (discount / 100));
         const total = discountedPrice * quantity;
 
-        row.find('.item-total').text('$' + total.toFixed(2));
+        row.find('.item-total').text('LKR' + total.toFixed(2));
         updateOrderTotals();
     });
 
@@ -464,15 +464,15 @@ $(document).ready(function() {
         let subtotal = 0;
 
         $('.item-total').each(function() {
-            subtotal += parseFloat($(this).text().replace('$', ''));
+            subtotal += parseFloat($(this).text().replace('LKR', ''));
         });
 
         const discountPercentage = parseFloat($('#discountInput').val()) || 0;
         const discountAmount = subtotal * (discountPercentage / 100);
         const total = subtotal - discountAmount;
 
-        $('#subtotal').text('$' + subtotal.toFixed(2));
-        $('#total').text('$' + total.toFixed(2));
+        $('#subtotal').text('LKR' + subtotal.toFixed(2));
+        $('#total').text('LKR' + total.toFixed(2));
     }
 
     // Complete order
@@ -490,7 +490,7 @@ $(document).ready(function() {
             const item = {
                 id: $(this).data('id'),
                 quantity: $(this).find('.item-quantity').val(),
-                price: $(this).find('td:eq(4)').text().replace('$', ''),
+                price: $(this).find('td:eq(4)').text().replace('LKR', ''),
                 discount: $(this).find('.item-discount').val() || 0
             };
             items.push(item);
@@ -507,9 +507,9 @@ $(document).ready(function() {
             customer_email: $('#customerEmail').val(),
             customer_address: $('#customerAddress').val(),
             items: items,
-            subtotal: $('#subtotal').text().replace('$', ''),
+            subtotal: $('#subtotal').text().replace('LKR', ''),
             discount: $('#discountInput').val(),
-            total: $('#total').text().replace('$', '')
+            total: $('#total').text().replace('LKR', '')
         };
 
         // Here you would typically send the order to the server
