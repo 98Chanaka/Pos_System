@@ -39,11 +39,11 @@ class PosController extends Controller
         return response()->json(['items' => $items]);
     }
 
-    public function getItemByCode(Request $request)
-    {
-        $item = Item::where('item_code', $request->item_code)
-                   ->first(['id', 'item_code as code', 'item_name as name', 'company_name as company', 'selling_price as price']);
+    // public function getItemByCode(Request $request)
+    // {
+    //     $item = Item::where('item_code', $request->item_code)
+    //                ->first(['id', 'item_code as code', 'item_name as name', 'company_name as company', 'selling_price as price']);
 
-        return response()->json(['item' => $item]);
-    }
+    //     return response()->json(['item' => $item]);
+    // }
 }

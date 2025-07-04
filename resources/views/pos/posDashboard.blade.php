@@ -5,43 +5,13 @@
 @section('content')
 <div class="app-content">
     <div class="container-fluid py-4">
-        <div class="row">
-            <!-- Customer Details - Full Width Card with Two Sections -->
-            <div class="col-md-12">
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white d-flex justify-content-center align-items-center">
-                        <h5 class="card-title mb-0">Customer Details</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <!-- Left Section - Basic Info -->
-                            <div class="col-md-6 border-end">
-                                <form>
-                                    <div class="mb-3">
-                                        <label for="customerName" class="form-label">Customer Name</label>
-                                        <input type="text" class="form-control" id="customerName" placeholder="Enter customer name">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="customerPhone" class="form-label">Phone Number</label>
-                                        <input type="text" class="form-control" id="customerPhone" placeholder="Enter phone number">
-                                    </div>
-                                </form>
-                            </div>
-
-                            <!-- Right Section - Additional Info -->
-                            <div class="col-md-6">
-                                <form>
-                                    <div class="mb-3">
-                                        <label for="customerEmail" class="form-label">Email Address</label>
-                                        <input type="email" class="form-control" id="customerEmail" placeholder="Enter email address">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="customerAddress" class="form-label">Address</label>
-                                        <textarea class="form-control" id="customerAddress" rows="2" placeholder="Enter customer address"></textarea>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
+        <!-- Invoice Header -->
+        <div class="card mb-4">
+            <div class="card-header  text-black">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Invoice #<span id="invoiceNumber">{{ $nextInvoiceNumber ?? '00001' }}</span></h5>
+                    <div class="text-end">
+                        <span id="currentDate">{{ now()->format('Y-m-d H:i:s') }}</span>
                     </div>
                 </div>
             </div>
@@ -144,8 +114,7 @@
                 </div>
                 <div class="d-flex justify-content-end mt-3 gap-2">
                     <button class="btn btn-outline-danger" id="cancelOrderBtn">Cancel Order</button>
-                    <button class="btn btn-outline-primary" id="printInvoiceBtn">Print Invoice</button>
-
+                    <button class="btn btn-outline-primary" id="printInvoiceBtn">Complete Order</button>
                 </div>
             </div>
         </div>
@@ -180,9 +149,46 @@
     </div>
 </div>
 
+<!-- Modal for Customer Details -->
+<div class="modal fade" id="customerDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Customer Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="customerDetailsForm">
+                    <div class="mb-3">
+                        <label for="customerName" class="form-label">Customer Name</label>
+                        <input type="text" class="form-control" id="customerName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="customerPhone" class="form-label">Phone Number</label>
+                        <input type="text" class="form-control" id="customerPhone" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="customerEmail" class="form-label">Email (Optional)</label>
+                        <input type="email" class="form-control" id="customerEmail">
+                    </div>
+                    <div class="mb-3">
+                        <label for="customerAddress" class="form-label">Address (Optional)</label>
+                        <textarea class="form-control" id="customerAddress" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="confirmPrintBtn">Complete Order</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(document).ready(function() {
     // Initialize Select2 for all dropdowns
@@ -312,7 +318,7 @@ $(document).ready(function() {
                                 <td>${item.item_code}</td>
                                 <td>${item.item_name}</td>
                                 <td>${item.company_name}</td>
-                                <td>$${item.selling_price}</td>
+                                <td>LKR${item.selling_price}</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary select-item"
                                         data-id="${item.id}"
@@ -391,7 +397,7 @@ $(document).ready(function() {
             const price = parseFloat(existingItem.find('td:eq(4)').text().replace('LKR', ''));
             const discount = parseFloat(existingItem.find('.item-discount').val()) || 0;
             const discountedPrice = price - (price * (discount / 100));
-            totalCell.text('$' + (discountedPrice * newQuantity).toFixed(2));
+            totalCell.text('LKR' + (discountedPrice * newQuantity).toFixed(2));
         } else {
             // Add new item
             const row = `
@@ -400,7 +406,7 @@ $(document).ready(function() {
                     <td>${item.code}</td>
                     <td>${item.name}</td>
                     <td>${item.company}</td>
-                    <td>${item.price}</td>
+                    <td>LKR${item.price}</td>
                     <td>
                         <div class="input-group input-group-sm" style="width: 100px;">
                             <input type="number" class="form-control form-control-sm item-discount"
@@ -412,8 +418,7 @@ $(document).ready(function() {
                         <input type="number" class="form-control form-control-sm item-quantity"
                                value="1" min="1" style="width: 70px;">
                     </td>
-                    <td class="item-total">${item.price}</td>
-
+                    <td class="item-total">LKR${item.price}</td>
                     <td>
                         <button class="btn btn-sm btn-danger remove-item">Remove</button>
                     </td>
@@ -435,7 +440,7 @@ $(document).ready(function() {
     // Update quantity and totals when changed
     $(document).on('change', '.item-quantity, .item-discount', function() {
         const row = $(this).closest('tr');
-        const price = parseFloat(row.find('td:eq(4)').text().replace('$', ''));
+        const price = parseFloat(row.find('td:eq(4)').text().replace('LKR', ''));
         const quantity = parseInt(row.find('.item-quantity').val());
         const discount = parseFloat(row.find('.item-discount').val()) || 0;
 
@@ -475,55 +480,6 @@ $(document).ready(function() {
         $('#total').text('LKR' + total.toFixed(2));
     }
 
-    // Complete order
-    $('#completeOrderBtn').click(function() {
-        const items = [];
-        const customerName = $('#customerName').val();
-        const customerPhone = $('#customerPhone').val();
-
-        if(!customerName || !customerPhone) {
-            alert('Please enter customer name and phone number');
-            return;
-        }
-
-        $('#orderItemsTable tr').each(function() {
-            const item = {
-                id: $(this).data('id'),
-                quantity: $(this).find('.item-quantity').val(),
-                price: $(this).find('td:eq(4)').text().replace('LKR', ''),
-                discount: $(this).find('.item-discount').val() || 0
-            };
-            items.push(item);
-        });
-
-        if(items.length === 0) {
-            alert('Please add items to the order');
-            return;
-        }
-
-        const orderData = {
-            customer_name: customerName,
-            customer_phone: customerPhone,
-            customer_email: $('#customerEmail').val(),
-            customer_address: $('#customerAddress').val(),
-            items: items,
-            subtotal: $('#subtotal').text().replace('LKR', ''),
-            discount: $('#discountInput').val(),
-            total: $('#total').text().replace('LKR', '')
-        };
-
-        // Here you would typically send the order to the server
-        console.log('Order completed:', orderData);
-        alert('Order completed successfully!');
-
-        // Clear the order table
-        $('#orderItemsTable').empty();
-        $('#itemSearchForm')[0].reset();
-        $('.select2').val(null).trigger('change');
-        $('#discountInput').val(0);
-        updateOrderTotals();
-    });
-
     // Cancel order
     $('#cancelOrderBtn').click(function() {
         Swal.fire({
@@ -541,11 +497,6 @@ $(document).ready(function() {
                 // Reset the form
                 $('#itemSearchForm')[0].reset();
                 $('.select2').val(null).trigger('change');
-                // Reset customer details
-                $('#customerName').val('');
-                $('#customerPhone').val('');
-                $('#customerEmail').val('');
-                $('#customerAddress').val('');
                 // Reset totals
                 $('#discountInput').val(0);
                 updateOrderTotals();
@@ -559,10 +510,88 @@ $(document).ready(function() {
         });
     });
 
-
-    // Print invoice
+    // Open customer details modal when Complete Order button is clicked
     $('#printInvoiceBtn').click(function() {
-        window.print();
+        // Check if there are items in the order
+        if ($('#orderItemsTable tr').length === 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Empty Order',
+                text: 'Please add items to the order before completing it.',
+            });
+            return;
+        }
+
+        $('#customerDetailsModal').modal('show');
+    });
+
+    // Complete order when confirm button is clicked in customer details modal
+    $('#confirmPrintBtn').click(function() {
+        const customerName = $('#customerName').val();
+        //const customerPhone = $('#customerPhone').val();
+
+        if (!customerName || !customerPhone) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Missing Information',
+                text: 'Please provide customer name and phone number.',
+            });
+            return;
+        }
+
+        // Prepare order data
+        const items = [];
+        $('#orderItemsTable tr').each(function() {
+            const item = {
+                id: $(this).data('id'),
+                quantity: $(this).find('.item-quantity').val(),
+                price: $(this).find('td:eq(4)').text().replace('LKR', ''),
+                discount: $(this).find('.item-discount').val() || 0
+            };
+            items.push(item);
+        });
+
+        const orderData = {
+            customer_name: customerName,
+            customer_phone: customerPhone,
+            customer_email: $('#customerEmail').val(),
+            customer_address: $('#customerAddress').val(),
+            items: items,
+            subtotal: $('#subtotal').text().replace('LKR', ''),
+            discount: $('#discountInput').val(),
+            total: $('#total').text().replace('LKR', ''),
+            invoice_number: $('#invoiceNumber').text()
+        };
+
+        // Here you would typically send the order to the server via AJAX
+        console.log('Order data:', orderData);
+
+        // For demo purposes, just show a success message
+        Swal.fire({
+            icon: 'success',
+            title: 'Order Completed!',
+            text: 'The order has been successfully processed.',
+        }).then(() => {
+            // Clear the order table
+            $('#orderItemsTable').empty();
+            // Reset the form
+            $('#itemSearchForm')[0].reset();
+            $('.select2').val(null).trigger('change');
+            // Reset customer details
+            $('#customerName').val('');
+            $('#customerPhone').val('');
+            $('#customerEmail').val('');
+            $('#customerAddress').val('');
+            // Reset totals
+            $('#discountInput').val(0);
+            updateOrderTotals();
+            // Close modal
+            $('#customerDetailsModal').modal('hide');
+
+            // Increment invoice number (for demo purposes)
+            const currentNum = parseInt($('#invoiceNumber').text());
+            $('#invoiceNumber').text(String(currentNum + 1).padStart(5, '0'));
+        });
     });
 });
 </script>
